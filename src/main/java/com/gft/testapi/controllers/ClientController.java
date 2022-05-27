@@ -37,7 +37,6 @@ public class ClientController {
         } catch (ClientNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
-
     }
 
     @PostMapping("/")
@@ -67,7 +66,11 @@ public class ClientController {
 
         try {
             clientService.update(id, clientDTO);
-            return ResponseEntity.ok().body(clientDTO);
+
+            URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                    .path("/{id}").buildAndExpand(id)
+                    .toUri();
+            return ResponseEntity.accepted().build();
         } catch (ClientNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }

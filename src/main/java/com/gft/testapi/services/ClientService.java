@@ -26,15 +26,9 @@ public class ClientService {
                 .collect(Collectors.toList());
     }
 
-    public ClientDTO getbyId(Long id) {
-
-        if (clientExists(id)) {
-            var client = clientRepository.findById(id).get();
-            return mapper.map(client, ClientDTO.class);
-        } else {
-            throw new ClientNotFoundException("Client not found!");
-        }
-
+    public Client getbyId(Long id) {
+        var obj = clientRepository.findById(id);
+        return obj.orElseThrow(() -> new ClientNotFoundException("Client not found!"));
     }
 
     public ClientDTO save(ClientDTO clientDTO) {
@@ -53,13 +47,12 @@ public class ClientService {
         }
     }
 
-    public ClientDTO update(Long id, ClientDTO clientDTO) throws ClientNotFoundException {
-
-        var client = clientRepository.findById(id);
+    public void update(Long id, ClientDTO clientDTO) throws ClientNotFoundException {
 
         if (clientExists(id)) {
+            var client = clientRepository.findById(id).get();
 
-            var updatedClient = client.get().updateName(clientDTO.getName())
+            var updatedClient = client.updateName(clientDTO.getName())
                     .updateAge(clientDTO.getAge())
                     .updateDate(clientDTO.getMemberSince());
 
@@ -67,7 +60,6 @@ public class ClientService {
         } else {
             throw new ClientNotFoundException("Client Not Found!");
         }
-        return mapper.map(client.get(), ClientDTO.class);
     }
 
     public boolean clientExists(Long id) {
