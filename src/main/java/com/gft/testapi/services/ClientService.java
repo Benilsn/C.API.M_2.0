@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class ClientService {
 
+    public static final String CLIENT_NOT_FOUND = "Client not found!";
+
     @Autowired
     private ClientRepository clientRepository;
 
@@ -28,7 +30,7 @@ public class ClientService {
 
     public Client getbyId(Long id) {
         var obj = clientRepository.findById(id);
-        return obj.orElseThrow(() -> new ClientNotFoundException("Client not found!"));
+        return obj.orElseThrow(() -> new ClientNotFoundException(CLIENT_NOT_FOUND));
     }
 
     public ClientDTO save(ClientDTO clientDTO) {
@@ -36,40 +38,27 @@ public class ClientService {
         return clientDTO;
     }
 
-    public void delete(Long id) throws ClientNotFoundException {
+    public Client delete(Long id) throws ClientNotFoundException {
 
         var client = clientRepository.findById(id);
 
-        if (clientExists(id)) {
-            clientRepository.delete(client.get());
-        } else {
-            throw new ClientNotFoundException("Client Not Found!");
-        }
+        client.ifPresent(value -> clientRepository.delete(value));
+
+        return client.orElseThrow(() -> new ClientNotFoundException(CLIENT_NOT_FOUND));
     }
 
-    public void update(Long id, ClientDTO clientDTO) throws ClientNotFoundException {
+    public Client update(ClientDTO clientDTO) throws ClientNotFoundException {
 
-        if (clientExists(id)) {
-            var client = clientRepository.findById(id).get();
-
-            var updatedClient = client.updateName(clientDTO.getName())
-                    .updateAge(clientDTO.getAge())
-                    .updateDate(clientDTO.getMemberSince());
-
-            clientRepository.save(updatedClient);
-        } else {
-            throw new ClientNotFoundException("Client Not Found!");
-        }
-    }
-
-    public boolean clientExists(Long id) {
-
-        var client = clientRepository.findById(id);
+        var client = clientRepository.findById(clientDTO.getId());
+        var updatedClient = new Client();
 
         if (client.isPresent()) {
-            return true;
+            updatedClient = client.get().updateName(clientDTO.getName())
+                    .updateAge(clientDTO.getAge())
+                    .updateDate(clientDTO.getMemberSince());
+            return clientRepository.save(updatedClient);
         } else {
-            return false;
+            throw new ClientNotFoundException(CLIENT_NOT_FOUND);
         }
 
     }

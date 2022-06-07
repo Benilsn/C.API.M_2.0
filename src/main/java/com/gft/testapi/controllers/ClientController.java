@@ -54,21 +54,21 @@ public class ClientController {
 
         try {
             clientService.delete(id);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return ResponseEntity.ok("Client with id:" + id + " deleted!");
 
         } catch (ClientNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody ClientDTO clientDTO) {
+    @PutMapping("/")
+    public ResponseEntity<?> update(@RequestBody ClientDTO clientDTO) {
 
         try {
-            clientService.update(id, clientDTO);
+            clientService.update(clientDTO);
 
             URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
-                    .path("/{id}").buildAndExpand(id)
+                    .path("/{id}").buildAndExpand(clientDTO.getId())
                     .toUri();
             return ResponseEntity.accepted().build();
         } catch (ClientNotFoundException e) {
